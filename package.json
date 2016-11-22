@@ -1,0 +1,26 @@
+{
+  "name": "google-facts",
+  "description": "Fun way to learn more about Google!",
+  "version": "0.0.1",
+  "private": true,
+  "license": "Apache Version 2.0",
+  "author": "Google Inc.",
+  "engines": {
+    "node": "~4.2"
+  },
+  "scripts": {
+    "lint": "semistandard --fix \"**/*.js\"",
+    "start": "node app.js",
+    "monitor": "nodemon app.js",
+    "deploy": "gcloud app deploy"
+  },
+  "dependencies": {
+    "crypto-js": "~3.1.7",
+    "body-parser": "^1.15.2",
+    "express": "^4.13.4",
+    "debug": "^2.2.0"
+  },
+  "devDependencies": {
+    "semistandard": "^9.1.0"
+  }
+}
