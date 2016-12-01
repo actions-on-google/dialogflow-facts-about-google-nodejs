@@ -1,5 +1,5 @@
 {
-  "name": "google-facts",
+  "name": "facts-about-google",
   "description": "Fun way to learn more about Google!",
   "version": "0.0.1",
   "private": true,
@@ -15,10 +15,9 @@
     "deploy": "gcloud app deploy"
   },
   "dependencies": {
-    "crypto-js": "~3.1.7",
     "body-parser": "^1.15.2",
     "express": "^4.13.4",
-    "debug": "^2.2.0"
+    "actions-on-google": "^1.0.0"
   },
   "devDependencies": {
     "semistandard": "^9.1.0"

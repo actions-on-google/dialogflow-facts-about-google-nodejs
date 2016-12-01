@@ -24,9 +24,16 @@ app.use(bodyParser.json({type: 'application/json'}));
 const GOOGLE_HEADER_SIGNATURE = 'Google-Assistant-Signature';
 const PRIVATE_KEY = 'YOUR_PRIVATE_KEY';
 
+// API.AI actions
+const WELCOME = 'input.welcome';
 const SAY_CAT_FACT = 'say_cat_fact';
 const SAY_GOOGLE_FACT = 'say_google_fact';
+
+// API.AI parameter names
+const UNRECOGNIZED_DEEP_LINK_ARGUMENT = 'unrecognized_deep_link';
 const CATEGORY_ARGUMENT = 'category';
+
+// API.AI Contexts/lifespans
 const GOOGLE_CONTEXT = 'google-facts';
 const CAT_CONTEXT = 'cat-facts';
 const DEFAULT_LIFESPAN = 5;
@@ -92,6 +99,20 @@ app.post('/', function (req, res) {
   if (!assistant.isRequestFromApiAi(GOOGLE_HEADER_SIGNATURE, PRIVATE_KEY)) {
     console.log('Request is not from trusted source (API.AI)');
     return;
+  }
+
+  // Greet the user
+  function greetUser (assistant) {
+    // Check if an unrecognized deep link triggered the Welcome intent
+    if (assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT)) {
+      assistant.ask('Welcome to Facts about Google! I didn\'t quite understand ' +
+        assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT) + ' ' +
+        'but I can tell you about Google\'s history or its headquarters. Which ' +
+        'one would you like to hear about?');
+    } else {
+      assistant.ask('Welcome to Facts about Google! Do you want to hear ' +
+        'about Google\'s history or do you want to hear about its headquarters?');
+    }
   }
 
   // Say a Google fact
@@ -184,6 +205,7 @@ app.post('/', function (req, res) {
   }
 
   let actionMap = new Map();
+  actionMap.set(WELCOME, greetUser);
   actionMap.set(SAY_GOOGLE_FACT, tellGoogleFact);
   actionMap.set(SAY_CAT_FACT, tellCatFact);
 
