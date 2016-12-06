@@ -22,12 +22,12 @@ let app = express();
 app.use(bodyParser.json({type: 'application/json'}));
 
 // API.AI actions
-const WELCOME = 'input.welcome';
+const UNRECOGNIZED_DEEP_LINK = 'deeplink.unknown';
 const SAY_CAT_FACT = 'say_cat_fact';
 const SAY_GOOGLE_FACT = 'say_google_fact';
 
 // API.AI parameter names
-const UNRECOGNIZED_DEEP_LINK_ARGUMENT = 'unrecognized_deep_link';
+const UNRECOGNIZED_DEEP_LINK_ARGUMENT = 'raw_text';
 const CATEGORY_ARGUMENT = 'category';
 
 // API.AI Contexts/lifespans
@@ -93,18 +93,12 @@ app.post('/', function (req, res) {
   console.log('Request headers: ' + JSON.stringify(req.headers));
   console.log('Request body: ' + JSON.stringify(req.body));
 
-  // Greet the user
-  function greetUser (assistant) {
-    // Check if an unrecognized deep link triggered the Welcome intent
-    if (assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT)) {
-      assistant.ask('Welcome to Facts about Google! I didn\'t quite understand ' +
-        assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT) + ' ' +
-        'but I can tell you about Google\'s history or its headquarters. Which ' +
-        'one would you like to hear about?');
-    } else {
-      assistant.ask('Welcome to Facts about Google! Do you want to hear ' +
-        'about Google\'s history or do you want to hear about its headquarters?');
-    }
+  // Greet the user and direct them to next turn
+  function unhandledDeepLinks (assistant) {
+    assistant.ask(`Welcome to Facts about Google! I'd really rather
+      not talk about ${assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT)}.
+      Wouldn't you rather talk about Google? I can tell you about
+      Google's history or its headquarters. Which do you want to hear about?`);
   }
 
   // Say a Google fact
@@ -148,9 +142,9 @@ app.post('/', function (req, res) {
       return;
     } else {
       // Conversation repair is handled in API.AI, but this is a safeguard
-      assistant.ask('Sorry, I didn\'t understand. I can tell you about ' +
-        'Google\'s history, or its headquarters. Which one do you want to ' +
-        'hear about?');
+      assistant.ask(`Sorry, I didn't understand. I can tell you about
+        Google's history, or its headquarters. Which one do you want to
+        hear about?`);
     }
   }
 
@@ -187,8 +181,8 @@ app.post('/', function (req, res) {
     // Replace the outgoing google-facts context with different parameters
     assistant.setContext(GOOGLE_CONTEXT, DEFAULT_LIFESPAN,
         parameters);
-    let response = `Looks like you've heard all there is to know\
-        about the ${currentCategory} of Google. Would you like to hear\
+    let response = `Looks like you've heard all there is to know
+        about the ${currentCategory} of Google. Would you like to hear
         about its ${redirectCategory}? `;
     if (!assistant.data.catFacts || assistant.data.catFacts.length > 0) {
       response += 'By the way, I can tell you about cats too.';
@@ -197,7 +191,7 @@ app.post('/', function (req, res) {
   }
 
   let actionMap = new Map();
-  actionMap.set(WELCOME, greetUser);
+  actionMap.set(UNRECOGNIZED_DEEP_LINK, unhandledDeepLinks);
   actionMap.set(SAY_GOOGLE_FACT, tellGoogleFact);
   actionMap.set(SAY_CAT_FACT, tellCatFact);
 
