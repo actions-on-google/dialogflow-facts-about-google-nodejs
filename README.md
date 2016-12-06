@@ -25,7 +25,6 @@ See the developer guide and release notes at https://developers.google.com/actio
 1. Make sure all domains are turned off
 1. Deploy the app to your preferred hosting environment (we recommend Google App Engine)
 1. In the Fulfillment page, enable Fulfillment and specify the deployment URL
-1. In the Headers section, add a key for "Google-Assistant-Signature", with your own private key value
 1. For the following intents, make sure fulfillment is enabled
     * choose_cats
     * choose_google

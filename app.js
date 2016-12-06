@@ -21,9 +21,6 @@ let bodyParser = require('body-parser');
 let app = express();
 app.use(bodyParser.json({type: 'application/json'}));
 
-const GOOGLE_HEADER_SIGNATURE = 'Google-Assistant-Signature';
-const PRIVATE_KEY = 'YOUR_PRIVATE_KEY';
-
 // API.AI actions
 const WELCOME = 'input.welcome';
 const SAY_CAT_FACT = 'say_cat_fact';
@@ -95,11 +92,6 @@ app.post('/', function (req, res) {
   const assistant = new Assistant({request: req, response: res});
   console.log('Request headers: ' + JSON.stringify(req.headers));
   console.log('Request body: ' + JSON.stringify(req.body));
-
-  if (!assistant.isRequestFromApiAi(GOOGLE_HEADER_SIGNATURE, PRIVATE_KEY)) {
-    console.log('Request is not from trusted source (API.AI)');
-    return;
-  }
 
   // Greet the user
   function greetUser (assistant) {
@@ -195,7 +187,7 @@ app.post('/', function (req, res) {
     // Replace the outgoing google-facts context with different parameters
     assistant.setContext(GOOGLE_CONTEXT, DEFAULT_LIFESPAN,
         parameters);
-    let response = `Looks like you\'ve heard all there is to know\
+    let response = `Looks like you've heard all there is to know\
         about the ${currentCategory} of Google. Would you like to hear\
         about its ${redirectCategory}? `;
     if (!assistant.data.catFacts || assistant.data.catFacts.length > 0) {
