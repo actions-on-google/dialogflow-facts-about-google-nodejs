@@ -1,50 +1,48 @@
-# Actions On Google Facts about Google Sample for Node.js
-==================================================
+# Actions on Google Facts about Google Sample using Node.js
 
-This sample shows how to create an action for the Google Assistant using API.AI
-
+This is a knowledgable Action that shares interesting facts about Google.
+The sample introduces advanced features like custom entities, contexts,
+and deep links. Use this Action and you might see that it even knows about a
+subject other than Google!
 
 ## Setup Instructions
 
-# Pre-requisites
- 1. API.AI: [https://api.ai](https://api.ai)
+### Pre-requisites
+ 1. API.AI account: [https://api.ai](https://api.ai)
+ 2. Google Cloud project: [https://console.cloud.google.com/project](https://console.cloud.google.com/project)
 
-See the developer guide and release notes at https://developers.google.com/actions/ for more details.
+See the developer guide and release notes at [https://developers.google.com/actions/](https://developers.google.com/actions/) for more details.
 
-# Steps:
-1. Create a new API.AI agent at http://api.ai
-1. In your agent settings, navigate to Export and Import
-1. Click Import from Zip
-1. Choose the FactsAboutGoogle.zip, included in this repository
-1. Follow the directions to import
-1. See the new intents in your project
-1. Enable the Actions on Google integration and set the following intents as Additional triggers
-    * choose_cats
-    * choose_google
-1. In the ```quit``` intent, mark End Conversation for Actions on Google
-1. Make sure all domains are turned off
-1. Deploy the app to your preferred hosting environment (we recommend Google App Engine)
-1. In the Fulfillment page, enable Fulfillment and specify the deployment URL
-1. For the following intents, make sure fulfillment is enabled
-    * choose_cats
-    * choose_google
-    * say_cat_fact
-    * say_google_fact
-
-## Documentation
-* Actions on Google: https://developers.google.com/actions/
+### Steps
+ 1. Create a new agent in API.AI [https://api.ai](https://api.ai).
+ 1. Click on the project gear icon to see the project settings.
+ 1. Select "Export and Import".
+ 1. Select "Restore from zip". Follow the directions to restore.
+ 1. Select the FactsAboutGoogle.zip file in this repo.
+ 1. Deploy this app to your preferred hosting environment (we recommend Google App Engine).
+ 1. Set the "Fulfillment" webhook URL to the hosting URL.
+ 1. Make sure all domains are turned off.
+ 1. Enable Actions on Google in the Integrations.
+ 1. Enter the following intents as "Additional triggering intents"
+     * choose_google
+     * choose_cats
+ 1. In the quit_facts intent, check "End Conversation" for Actions on Google.
+ 1. Provide an invocation name for the action.
+ 1. Authorize and preview the action in the [web simulator](https://developers.google.com/actions/tools/web-simulator).
 
 ## References and How to report bugs
-* If you find any issues, please open a bug here on GitHub
+* Actions on Google documentation: [https://developers.google.com/actions/](https://developers.google.com/actions/).
+* If you find any issues, please open a bug here on GitHub.
+* Questions are answered on [StackOverflow](https://stackoverflow.com/questions/tagged/actions-on-google).
 
-How to make contributions?
-Please read and follow the steps in the CONTRIBUTING.md
+## How to make contributions?
+Please read and follow the steps in the CONTRIBUTING.md.
 
-License
-See LICENSE.md
+## License
+See LICENSE.md.
 
 ## Terms
-Your use of this sample is subject to, and by using or downloading the sample files you agree to comply with, the [Google APIs Terms of Service](https://developers.google.com/terms/) and the [Actions On Google Developer Terms of Service](https://developers.google.com/actions/docs/terms/).
+Your use of this sample is subject to, and by using or downloading the sample files you agree to comply with, the [Google APIs Terms of Service](https://developers.google.com/terms/).
 
 ## Google+
-Actions on Google Developers Community on Google+ [http://g.co/actionsdev](http://g.co/actionsdev)
+Actions on Google Developers Community on Google+ [https://g.co/actionsdev](https://g.co/actionsdev).
