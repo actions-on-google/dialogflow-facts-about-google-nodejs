@@ -95,9 +95,9 @@ app.post('/', function (req, res) {
 
   // Greet the user and direct them to next turn
   function unhandledDeepLinks (assistant) {
-    assistant.ask(`Welcome to Facts about Google! I'd really rather
-      not talk about ${assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT)}.
-      Wouldn't you rather talk about Google? I can tell you about
+    assistant.ask(`Welcome to Facts about Google! I'd really rather \
+      not talk about ${assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT)}. \
+      Wouldn't you rather talk about Google? I can tell you about \
       Google's history or its headquarters. Which do you want to hear about?`);
   }
 
@@ -142,8 +142,8 @@ app.post('/', function (req, res) {
       return;
     } else {
       // Conversation repair is handled in API.AI, but this is a safeguard
-      assistant.ask(`Sorry, I didn't understand. I can tell you about
-        Google's history, or its headquarters. Which one do you want to
+      assistant.ask(`Sorry, I didn't understand. I can tell you about \
+        Google's history, or its headquarters. Which one do you want to \
         hear about?`);
     }
   }
@@ -181,8 +181,8 @@ app.post('/', function (req, res) {
     // Replace the outgoing google-facts context with different parameters
     assistant.setContext(GOOGLE_CONTEXT, DEFAULT_LIFESPAN,
         parameters);
-    let response = `Looks like you've heard all there is to know
-        about the ${currentCategory} of Google. Would you like to hear
+    let response = `Looks like you've heard all there is to know \
+        about the ${currentCategory} of Google. Would you like to hear \
         about its ${redirectCategory}? `;
     if (!assistant.data.catFacts || assistant.data.catFacts.length > 0) {
       response += 'By the way, I can tell you about cats too.';
