@@ -27,7 +27,6 @@ const SAY_CAT_FACT = 'say_cat_fact';
 const SAY_GOOGLE_FACT = 'say_google_fact';
 
 // API.AI parameter names
-const UNRECOGNIZED_DEEP_LINK_ARGUMENT = 'raw_text';
 const CATEGORY_ARGUMENT = 'category';
 
 // API.AI Contexts/lifespans
@@ -96,7 +95,7 @@ app.post('/', function (req, res) {
   // Greet the user and direct them to next turn
   function unhandledDeepLinks (assistant) {
     assistant.ask(`Welcome to Facts about Google! I'd really rather \
-      not talk about ${assistant.getArgument(UNRECOGNIZED_DEEP_LINK_ARGUMENT)}. \
+      not talk about ${assistant.getRawInput()}. \
       Wouldn't you rather talk about Google? I can tell you about \
       Google's history or its headquarters. Which do you want to hear about?`);
   }
