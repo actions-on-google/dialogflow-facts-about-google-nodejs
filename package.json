@@ -12,11 +12,9 @@
     "lint": "semistandard --fix \"**/*.js\"",
     "start": "node app.js",
     "monitor": "nodemon app.js",
-    "deploy": "gcloud app deploy"
+    "deploy": "gcloud beta functions deploy factsAboutGoogle --trigger-http --stage-bucket <storage_bucket_name>"
   },
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "express": "^4.13.4",
     "actions-on-google": "^1.0.0"
   },
   "devDependencies": {

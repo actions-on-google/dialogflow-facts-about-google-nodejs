@@ -14,12 +14,7 @@
 'use strict';
 
 process.env.DEBUG = 'actions-on-google:*';
-let Assistant = require('actions-on-google').ApiAiAssistant;
-let express = require('express');
-let bodyParser = require('body-parser');
-
-let app = express();
-app.use(bodyParser.json({type: 'application/json'}));
+const Assistant = require('actions-on-google').ApiAiAssistant;
 
 // API.AI actions
 const UNRECOGNIZED_DEEP_LINK = 'deeplink.unknown';
@@ -87,7 +82,7 @@ function getRandomFact (facts) {
 }
 
 // [START google_facts]
-app.post('/', function (req, res) {
+exports.factsAboutGoogle = (req, res) => {
   const assistant = new Assistant({request: req, response: res});
   console.log('Request headers: ' + JSON.stringify(req.headers));
   console.log('Request body: ' + JSON.stringify(req.body));
@@ -195,17 +190,5 @@ app.post('/', function (req, res) {
   actionMap.set(SAY_CAT_FACT, tellCatFact);
 
   assistant.handleRequest(actionMap);
-});
+};
 // [END google_facts]
-
-if (module === require.main) {
-  // [START server]
-  // Start the server
-  let server = app.listen(process.env.PORT || 8080, function () {
-    let port = server.address().port;
-    console.log('App listening on port %s', port);
-  });
-  // [END server]
-}
-
-module.exports = app;
