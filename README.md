@@ -19,7 +19,7 @@ See the developer guide and release notes at [https://developers.google.com/acti
  1. Select "Export and Import".
  1. Select "Restore from zip". Follow the directions to restore.
  1. Select the FactsAboutGoogle.zip file in this repo.
- 1. Deploy this app to your preferred hosting environment
+ 1. Deploy this action to your preferred hosting environment
  (we recommend [Google Cloud Functions](https://cloud.google.com/functions/docs/tutorials/http)).
  1. Set the "Fulfillment" webhook URL to the hosting URL.
  1. Make sure all domains are turned off.

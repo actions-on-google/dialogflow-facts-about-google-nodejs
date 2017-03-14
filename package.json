@@ -10,8 +10,7 @@
   },
   "scripts": {
     "lint": "semistandard --fix \"**/*.js\"",
-    "start": "node app.js",
-    "monitor": "nodemon app.js",
+    "start": "functions deploy factsAboutGoogle --trigger-http",
     "deploy": "gcloud beta functions deploy factsAboutGoogle --trigger-http --stage-bucket <storage_bucket_name>"
   },
   "dependencies": {
