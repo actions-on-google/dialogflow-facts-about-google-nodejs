@@ -57,9 +57,9 @@ const CAT_FACTS = new Set([
 
 const NEXT_FACT_DIRECTIVE = ' Would you like to hear another fact?';
 
-// This sample uses this sound from Freesound:
-// 'cat meow' by tuberatanka (https://www.freesound.org/people/tuberatanka/sounds/110011/)
-const MEOW_SRC = 'https://freesound.org/data/previews/110/110011_1537422-lq.mp3';
+// This sample uses a sound clip from the Actions on Google Sound Library
+// https://developers.google.com/actions/tools/sound-library
+const MEOW_SRC = 'https://actions.google.com/sounds/v1/animals/cat_purr_close.ogg';
 
 function getRandomFact (facts) {
   if (facts.size <= 0) {
