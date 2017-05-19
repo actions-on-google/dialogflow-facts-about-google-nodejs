@@ -1,4 +1,4 @@
-# Actions on Google Facts about Google Sample using Node.js
+# Actions on Google: Facts about Google Sample using Node.js
 
 This is a knowledgable Assistant app that shares interesting facts about Google.
 The sample introduces advanced features like custom entities, contexts,
