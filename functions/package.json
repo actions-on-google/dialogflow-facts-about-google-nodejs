@@ -10,11 +10,13 @@
   },
   "scripts": {
     "lint": "semistandard --fix \"**/*.js\"",
-    "start": "functions deploy factsAboutGoogle --trigger-http",
-    "deploy": "gcloud beta functions deploy factsAboutGoogle --trigger-http --stage-bucket <storage_bucket_name>"
+    "start": "firebase serve --only functions",
+    "deploy": "firebase deploy --only functions"
   },
   "dependencies": {
-    "actions-on-google": "^1.0.0"
+    "actions-on-google": "^1.0.0",
+    "firebase-admin": "^4.2.1",
+    "firebase-functions": "^0.5.7"
   },
   "devDependencies": {
     "semistandard": "^9.1.0"

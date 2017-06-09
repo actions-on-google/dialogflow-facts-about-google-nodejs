@@ -15,6 +15,7 @@
 
 process.env.DEBUG = 'actions-on-google:*';
 const App = require('actions-on-google').ApiAiApp;
+const functions = require('firebase-functions');
 
 // API.AI actions
 const UNRECOGNIZED_DEEP_LINK = 'deeplink.unknown';
@@ -123,7 +124,7 @@ function getRandomFact (facts) {
   return randomFact;
 }
 
-exports.factsAboutGoogle = (request, response) => {
+exports.factsAboutGoogle = functions.https.onRequest((request, response) => {
   const app = new App({ request, response });
   console.log('Request headers: ' + JSON.stringify(request.headers));
   console.log('Request body: ' + JSON.stringify(request.body));
@@ -136,7 +137,7 @@ exports.factsAboutGoogle = (request, response) => {
 not talk about ${app.getRawInput()}. Wouldn't you rather talk about \
 Google? I can tell you about Google's history or its headquarters. \
 Which do you want to hear about?`)
-        .addSuggestions(['History', 'Headquarters']), NO_INPUTS);
+        .addSuggestions(['History', 'Headquarters']));
     } else {
       app.ask(`Welcome to Facts about Google! I'd really rather \
 not talk about ${app.getRawInput()}. \
@@ -170,7 +171,7 @@ Google's history or its headquarters. Which do you want to hear about?`,
           }
           app.ask(app.buildRichResponse()
             .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS))
-            .addSuggestions(suggestions), NO_INPUTS);
+            .addSuggestions(suggestions));
         } else {
           app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS),
             NO_INPUTS);
@@ -188,7 +189,7 @@ Google's history or its headquarters. Which do you want to hear about?`,
             .addButton(LINK_OUT_TEXT, GOOGLE_LINK)
             .setImage(image[0], image[1]))
           .addSimpleResponse(NEXT_FACT_DIRECTIVE)
-          .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
+          .addSuggestions(CONFIRMATION_SUGGESTIONS));
       } else {
         app.ask(factPrefix + fact + NEXT_FACT_DIRECTIVE, NO_INPUTS);
       }
@@ -203,7 +204,7 @@ Google's history or its headquarters. Which do you want to hear about?`,
           }
           app.ask(app.buildRichResponse()
             .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY))
-            .addSuggestions(suggestions), NO_INPUTS);
+            .addSuggestions(suggestions));
         } else {
           app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY), NO_INPUTS);
         }
@@ -220,7 +221,7 @@ Google's history or its headquarters. Which do you want to hear about?`,
             .setImage(image[0], image[1])
             .addButton(LINK_OUT_TEXT, GOOGLE_LINK))
           .addSimpleResponse(NEXT_FACT_DIRECTIVE)
-          .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
+          .addSuggestions(CONFIRMATION_SUGGESTIONS));
       } else {
         app.ask(factPrefix + fact + NEXT_FACT_DIRECTIVE, NO_INPUTS);
       }
@@ -232,7 +233,7 @@ Google's history or its headquarters. Which do you want to hear about?`,
           .addSimpleResponse(`Sorry, I didn't understand. I can tell you about \
 Google's history, or its  headquarters. Which one do you want to \
 hear about?`)
-          .addSuggestions(['History', 'Headquarters']), NO_INPUTS);
+          .addSuggestions(['History', 'Headquarters']));
       } else {
         app.ask(`Sorry, I didn't understand. I can tell you about \
 Google's history, or its headquarters. Which one do you want to \
@@ -302,4 +303,4 @@ ${redirectCategory} instead. `;
   actionMap.set(TELL_CAT_FACT, tellCatFact);
 
   app.handleRequest(actionMap);
-};
+});
