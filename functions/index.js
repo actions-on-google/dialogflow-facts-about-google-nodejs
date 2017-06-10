@@ -193,7 +193,6 @@ Google's history or its headquarters. Which do you want to hear about?`,
       } else {
         app.ask(factPrefix + fact + NEXT_FACT_DIRECTIVE, NO_INPUTS);
       }
-      return;
     } else if (factCategory === FACT_TYPE.HEADQUARTERS) {
       let fact = getRandomFact(hqFacts);
       if (fact === null) {
@@ -225,7 +224,6 @@ Google's history or its headquarters. Which do you want to hear about?`,
       } else {
         app.ask(factPrefix + fact + NEXT_FACT_DIRECTIVE, NO_INPUTS);
       }
-      return;
     } else {
       // Conversation repair is handled in API.AI, but this is a safeguard
       if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
@@ -278,7 +276,6 @@ hear about?`, NO_INPUTS);
       app.ask(`<speak>${factPrefix} ${fact} ${NEXT_FACT_DIRECTIVE}</speak>`,
         NO_INPUTS);
     }
-    return;
   }
 
   // Say they've heard it all about this category
