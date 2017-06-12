@@ -13,8 +13,12 @@
 
 'use strict';
 
+/**
+ * @typedef {*} ApiAiApp
+ */
+
 process.env.DEBUG = 'actions-on-google:*';
-const App = require('actions-on-google').ApiAiApp;
+const { ApiAiApp } = require('actions-on-google');
 const functions = require('firebase-functions');
 
 // API.AI actions
@@ -45,7 +49,7 @@ const HISTORY_FACTS = new Set([
 ]);
 
 const HQ_FACTS = new Set([
-  'Google\'s headquarters is in Mountain View, California.',
+  "Google's headquarters is in Mountain View, California.",
   'Google has over 30 cafeterias in its main campus.',
   'Google has over 10 fitness facilities in its main campus.'
 ]);
@@ -87,12 +91,12 @@ const CAT_IMAGE = [
 const LINK_OUT_TEXT = 'Learn more';
 const GOOGLE_LINK = 'https://www.google.com/about/';
 const CATS_LINK = 'https://www.google.com/search?q=cats';
-const NEXT_FACT_DIRECTIVE = ' Would you like to hear another fact?';
+const NEXT_FACT_DIRECTIVE = 'Would you like to hear another fact?';
 const CONFIRMATION_SUGGESTIONS = ['Sure', 'No thanks'];
 
 const NO_INPUTS = [
-  'I didn\'t hear that.',
-  'If you\'re still there, say that again.',
+  "I didn't hear that.",
+  "If you're still there, say that again.",
   'We can stop here. See you soon.'
 ];
 
@@ -100,204 +104,279 @@ const NO_INPUTS = [
 // https://developers.google.com/actions/tools/sound-library
 const MEOW_SRC = 'https://actions.google.com/sounds/v1/animals/cat_purr_close.ogg';
 
-function getRandomImage (images) {
-  let randomIndex = Math.floor(Math.random() * images.length);
-  return images[randomIndex];
-}
-
-function getRandomFact (facts) {
-  if (facts.size <= 0) {
+/**
+ * Get a random value from an array
+ * @template T
+ * @param {Array<T>} array The array to get a random value from
+ * @return {T | null} A random value from the array or null if the array is empty
+ */
+function getRandomValue (array) {
+  if (!array.length) {
     return null;
   }
-  let randomIndex = (Math.random() * (facts.size - 1)).toFixed();
-  let randomFactIndex = parseInt(randomIndex, 10);
-  let counter = 0;
-  let randomFact = '';
-  for (let fact of facts.values()) {
-    if (counter === randomFactIndex) {
-      randomFact = fact;
-      break;
-    }
-    counter++;
-  }
-  facts.delete(randomFact);
-  return randomFact;
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex];
 }
 
-exports.factsAboutGoogle = functions.https.onRequest((request, response) => {
-  const app = new App({ request, response });
-  console.log('Request headers: ' + JSON.stringify(request.headers));
-  console.log('Request body: ' + JSON.stringify(request.body));
+/**
+ * Get a random image from an array of images
+ * @param {Array<Array<string>>} images The array of image urls to pick an image from
+ * @return {Array<string>} A random image url
+ */
+function getRandomImage (images) {
+  return getRandomValue(images);
+}
 
-  // Greet the user and direct them to next turn
-  function unhandledDeepLinks (app) {
-    if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-      app.ask(app.buildRichResponse()
-        .addSimpleResponse(`Welcome to Facts about Google! I'd really rather \
-not talk about ${app.getRawInput()}. Wouldn't you rather talk about \
-Google? I can tell you about Google's history or its headquarters. \
-Which do you want to hear about?`)
-        .addSuggestions(['History', 'Headquarters']));
-    } else {
-      app.ask(`Welcome to Facts about Google! I'd really rather \
-not talk about ${app.getRawInput()}. \
-Wouldn't you rather talk about Google? I can tell you about \
-Google's history or its headquarters. Which do you want to hear about?`,
-        NO_INPUTS);
-    }
+/**
+ * Gets a random fact from a set of facts
+ * @param {Set<string>} facts The set of facts to choose a fact from
+ * @return {string | null} A random fact
+ */
+function getRandomFact (facts) {
+  const fact = getRandomValue(Array.from(facts));
+  if (fact) {
+    facts.delete(fact); // Set.delete(null) does not throw an error but this is safer
+  }
+  return fact;
+}
+
+/**
+ * Concat messages together with a single space between each message given an array
+ * @param {Array<string>} messages The messages to concat
+ * @return {string} A single concatenated message with a single space between each message
+ */
+function concatMessagesArray (messages) {
+  return messages.map(message => message.trim()).join(' ');
+}
+
+/**
+ * Concat messages with a single space between each message given a list of strings as parameters
+ * @param {Array<string>} messages The messages to concat
+ * @return {string} A single concatenated message with a single space between each message
+ */
+function concatMessages (...messages) {
+  return concatMessagesArray(messages);
+}
+
+/**
+ * Greet the user and direct them to next turn
+ * @param {ApiAiApp} app ApiAiApp instance
+ * @return {void}
+ */
+function unhandledDeepLinks (app) {
+  if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
+    app.ask(app.buildRichResponse()
+      .addSimpleResponse(`Welcome to Facts about Google! I'd really rather not talk about ${app.getRawInput()}. Wouldn't you rather talk about Google? I can tell you about Google's history or its headquarters. Which do you want to hear about?`)
+      .addSuggestions(['History', 'Headquarters']), NO_INPUTS);
+  } else {
+    app.ask(`Welcome to Facts about Google! I'd really rather not talk about ${app.getRawInput()}. Wouldn't you rather talk about Google? I can tell you about Google's history or its headquarters. Which do you want to hear about?`, NO_INPUTS);
+  }
+}
+
+/**
+ * Say a fact
+ * @param {ApiAiApp} app ApiAiApp instance
+ * @return {void}
+ */
+function tellFact (app) {
+  /**
+   * @type {Set<string>}
+   */
+  const historyFacts = app.data.historyFacts ? new Set(app.data.historyFacts) : HISTORY_FACTS;
+  /**
+   * @type {Set<string>}
+   */
+  const hqFacts = app.data.hqFacts ? new Set(app.data.hqFacts) : HQ_FACTS;
+
+  if (!historyFacts.size && !hqFacts.size) {
+    app.tell('Actually it looks like you heard it all. Thanks for listening!');
+    return;
   }
 
-  // Say a fact
-  function tellFact (app) {
-    let historyFacts = app.data.historyFacts
-      ? new Set(app.data.historyFacts) : HISTORY_FACTS;
-    let hqFacts = app.data.hqFacts ? new Set(app.data.hqFacts) : HQ_FACTS;
+  /**
+   * @type {string}
+   */
+  const factCategory = app.getArgument(CATEGORY_ARGUMENT);
 
-    if (historyFacts.size === 0 && hqFacts.size === 0) {
-      app.tell('Actually it looks like you heard it all. ' +
-        'Thanks for listening!');
-      return;
-    }
+  /**
+   * @type {boolean}
+   */
+  const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
 
-    let factCategory = app.getArgument(CATEGORY_ARGUMENT);
-
-    if (factCategory === FACT_TYPE.HISTORY) {
-      let fact = getRandomFact(historyFacts);
-      if (fact === null) {
-        if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-          let suggestions = ['Headquarters'];
-          if (!app.data.catFacts || app.data.catFacts.length > 0) {
-            suggestions.push('Cats');
-          }
-          app.ask(app.buildRichResponse()
-            .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS))
-            .addSuggestions(suggestions));
-        } else {
-          app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS),
-            NO_INPUTS);
+  if (factCategory === FACT_TYPE.HISTORY) {
+    const fact = getRandomFact(historyFacts);
+    if (!fact) {
+      if (screenOutput) {
+        const suggestions = ['Headquarters'];
+        /**
+         * @type {Array<string>}
+         */
+        const catFacts = app.data.catFacts;
+        if (!catFacts || catFacts.length) {
+          suggestions.push('Cats');
         }
+        app.ask(app.buildRichResponse()
+          .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS))
+          .addSuggestions(suggestions), NO_INPUTS);
         return;
       }
 
-      let factPrefix = 'Sure, here\'s a history fact. ';
-      app.data.historyFacts = Array.from(historyFacts);
-      if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-        let image = getRandomImage(GOOGLE_IMAGES);
-        app.ask(app.buildRichResponse()
-          .addSimpleResponse(factPrefix)
-          .addBasicCard(app.buildBasicCard(fact)
-            .addButton(LINK_OUT_TEXT, GOOGLE_LINK)
-            .setImage(image[0], image[1]))
-          .addSimpleResponse(NEXT_FACT_DIRECTIVE)
-          .addSuggestions(CONFIRMATION_SUGGESTIONS));
-      } else {
-        app.ask(factPrefix + fact + NEXT_FACT_DIRECTIVE, NO_INPUTS);
-      }
-    } else if (factCategory === FACT_TYPE.HEADQUARTERS) {
-      let fact = getRandomFact(hqFacts);
-      if (fact === null) {
-        if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-          let suggestions = ['History'];
-          if (!app.data.catFacts || app.data.catFacts.length > 0) {
-            suggestions.push('Cats');
-          }
-          app.ask(app.buildRichResponse()
-            .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY))
-            .addSuggestions(suggestions));
-        } else {
-          app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY), NO_INPUTS);
-        }
-        return;
-      }
-
-      let factPrefix = 'Okay, here\'s a headquarters fact. ';
-      app.data.hqFacts = Array.from(hqFacts);
-      if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-        let image = getRandomImage(GOOGLE_IMAGES);
-        app.ask(app.buildRichResponse()
-          .addSimpleResponse(factPrefix)
-          .addBasicCard(app.buildBasicCard(fact)
-            .setImage(image[0], image[1])
-            .addButton(LINK_OUT_TEXT, GOOGLE_LINK))
-          .addSimpleResponse(NEXT_FACT_DIRECTIVE)
-          .addSuggestions(CONFIRMATION_SUGGESTIONS));
-      } else {
-        app.ask(factPrefix + fact + NEXT_FACT_DIRECTIVE, NO_INPUTS);
-      }
-    } else {
-      // Conversation repair is handled in API.AI, but this is a safeguard
-      if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-        app.ask(app.buildRichResponse()
-          .addSimpleResponse(`Sorry, I didn't understand. I can tell you about \
-Google's history, or its  headquarters. Which one do you want to \
-hear about?`)
-          .addSuggestions(['History', 'Headquarters']));
-      } else {
-        app.ask(`Sorry, I didn't understand. I can tell you about \
-Google's history, or its headquarters. Which one do you want to \
-hear about?`, NO_INPUTS);
-      }
-    }
-  }
-
-  // Say a cat fact
-  function tellCatFact (app) {
-    let catFacts = app.data.catFacts ? new Set(app.data.catFacts) : CAT_FACTS;
-    let fact = getRandomFact(catFacts);
-    if (fact === null) {
-      // Add facts context to outgoing context list
-      app.setContext(FACTS_CONTEXT, DEFAULT_LIFESPAN, {});
-      // Replace outgoing cat-facts context with lifespan = 0 to end it
-      app.setContext(CAT_CONTEXT, END_LIFESPAN, {});
-      if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-        app.ask(app.buildRichResponse()
-          .addSimpleResponse('Looks like you\'ve heard all there is to know ' +
-            'about cats. Would you like to hear about Google?', NO_INPUTS)
-          .addSuggestions(CONFIRMATION_SUGGESTIONS));
-      } else {
-        app.ask('Looks like you\'ve heard all there is to know ' +
-          'about cats. Would you like to hear about Google?', NO_INPUTS);
-      }
+      app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS), NO_INPUTS);
       return;
     }
 
-    app.data.catFacts = Array.from(catFacts);
-    let factPrefix =
-      `Alright, here's a cat fact. <audio src="${MEOW_SRC}"></audio>`;
-    if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
+    const factPrefix = "Sure, here's a history fact.";
+    app.data.historyFacts = Array.from(historyFacts);
+
+    if (screenOutput) {
+      const image = getRandomImage(GOOGLE_IMAGES);
       app.ask(app.buildRichResponse()
-        .addSimpleResponse(`<speak>${factPrefix}</speak>`)
+        .addSimpleResponse(factPrefix)
         .addBasicCard(app.buildBasicCard(fact)
-          .setImage(CAT_IMAGE[0], CAT_IMAGE[1])
-          .addButton(LINK_OUT_TEXT, CATS_LINK))
+          .addButton(LINK_OUT_TEXT, GOOGLE_LINK)
+          .setImage(image[0], image[1]))
         .addSimpleResponse(NEXT_FACT_DIRECTIVE)
         .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
-    } else {
-      app.ask(`<speak>${factPrefix} ${fact} ${NEXT_FACT_DIRECTIVE}</speak>`,
-        NO_INPUTS);
+      return;
     }
+
+    app.ask(concatMessages(factPrefix, fact, NEXT_FACT_DIRECTIVE), NO_INPUTS);
+    return;
   }
 
-  // Say they've heard it all about this category
-  function noFactsLeft (app, currentCategory, redirectCategory) {
-    let parameters = {};
-    parameters[CATEGORY_ARGUMENT] = redirectCategory;
-    // Replace the outgoing facts context with different parameters
-    app.setContext(FACTS_CONTEXT, DEFAULT_LIFESPAN, parameters);
-    let response = `Looks like you've heard all there is to know \
-about the ${currentCategory} of Google. I could tell you about its \
-${redirectCategory} instead. `;
-    if (!app.data.catFacts || app.data.catFacts.length > 0) {
-      response += 'By the way, I can tell you about cats too. ';
+  if (factCategory === FACT_TYPE.HEADQUARTERS) {
+    const fact = getRandomFact(hqFacts);
+    if (!fact) {
+      if (screenOutput) {
+        const suggestions = ['History'];
+        /**
+         * @type {Array<string>}
+         */
+        const catFacts = app.data.catFacts;
+        if (!catFacts || catFacts.length) {
+          suggestions.push('Cats');
+        }
+        app.ask(app.buildRichResponse()
+          .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY))
+          .addSuggestions(suggestions), NO_INPUTS);
+        return;
+      }
+      app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY), NO_INPUTS);
+      return;
     }
-    response += `So what would you like to hear about?`;
-    return response;
+
+    const factPrefix = "Okay, here's a headquarters fact.";
+    app.data.hqFacts = Array.from(hqFacts);
+    if (screenOutput) {
+      const image = getRandomImage(GOOGLE_IMAGES);
+      app.ask(app.buildRichResponse()
+        .addSimpleResponse(factPrefix)
+        .addBasicCard(app.buildBasicCard(fact)
+          .setImage(image[0], image[1])
+          .addButton(LINK_OUT_TEXT, GOOGLE_LINK))
+        .addSimpleResponse(NEXT_FACT_DIRECTIVE)
+        .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
+      return;
+    }
+    app.ask(concatMessages(factPrefix, fact, NEXT_FACT_DIRECTIVE), NO_INPUTS);
+    return;
   }
 
-  let actionMap = new Map();
+  console.error(`${CATEGORY_ARGUMENT} parameter was not provided by API.AI ${TELL_FACT} action`);
+}
+
+/**
+ * Say a cat fact
+ * @param {ApiAiApp} app ApiAiApp instance
+ * @return {void}
+ */
+function tellCatFact (app) {
+  /**
+   * @type {Set<string>}
+   */
+  const catFacts = app.data.catFacts ? new Set(app.data.catFacts) : CAT_FACTS;
+  const fact = getRandomFact(catFacts);
+
+  /**
+   * @type {boolean}
+   */
+  const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
+
+  if (!fact) {
+    // Add facts context to outgoing context list
+    app.setContext(FACTS_CONTEXT, DEFAULT_LIFESPAN, {});
+    // Replace outgoing cat-facts context with lifespan = 0 to end it
+    app.setContext(CAT_CONTEXT, END_LIFESPAN, {});
+    if (screenOutput) {
+      app.ask(app.buildRichResponse()
+        .addSimpleResponse("Looks like you've heard all there is to know about cats. Would you like to hear about Google?", NO_INPUTS)
+        .addSuggestions(CONFIRMATION_SUGGESTIONS));
+      return;
+    }
+    app.ask("Looks like you've heard all there is to know about cats. Would you like to hear about Google?", NO_INPUTS);
+    return;
+  }
+
+  app.data.catFacts = Array.from(catFacts);
+  const factPrefix = `Alright, here's a cat fact. <audio src="${MEOW_SRC}"></audio>`;
+  if (screenOutput) {
+    app.ask(app.buildRichResponse()
+      .addSimpleResponse(`<speak>${factPrefix}</speak>`)
+      .addBasicCard(app.buildBasicCard(fact)
+        .setImage(CAT_IMAGE[0], CAT_IMAGE[1])
+        .addButton(LINK_OUT_TEXT, CATS_LINK))
+      .addSimpleResponse(NEXT_FACT_DIRECTIVE)
+      .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
+    return;
+  }
+  app.ask(`<speak>${concatMessages(factPrefix, fact, NEXT_FACT_DIRECTIVE)}</speak>`, NO_INPUTS);
+}
+
+/**
+ * Say they've heard it all about this category
+ * @param {ApiAiApp} app ApiAiApp instance
+ * @param {string} currentCategory The current category
+ * @param {string} redirectCategory The category to redirect to since there are no facts left
+ * @return {string} The response to return back
+ */
+function noFactsLeft (app, currentCategory, redirectCategory) {
+  const parameters = {};
+  parameters[CATEGORY_ARGUMENT] = redirectCategory;
+  // Replace the outgoing facts context with different parameters
+  app.setContext(FACTS_CONTEXT, DEFAULT_LIFESPAN, parameters);
+  const response = [
+    `Looks like you've heard all there is to know about the ${currentCategory} of Google. I could tell you about its ${redirectCategory} instead.`
+  ];
+  /**
+   * @type {Array<string>}
+   */
+  const catFacts = app.data.catFacts;
+  if (!catFacts || catFacts.length) {
+    response.push('By the way, I can tell you about cats too.');
+  }
+  response.push('So what would you like to hear about?');
+  return concatMessagesArray(response);
+}
+
+/**
+ * The entry point to handle a http request
+ * @param {Request} request An Express like Request object of the HTTP request
+ * @param {Response} response An Express like Response object to send back data
+ * @return {void}
+ */
+function factsAboutGoogle (request, response) {
+  const app = new ApiAiApp({ request, response });
+  console.log(`Request headers: ${JSON.stringify(request.headers)}`);
+  console.log(`Request body: ${JSON.stringify(request.body)}`);
+
+  const actionMap = new Map();
   actionMap.set(UNRECOGNIZED_DEEP_LINK, unhandledDeepLinks);
   actionMap.set(TELL_FACT, tellFact);
   actionMap.set(TELL_CAT_FACT, tellCatFact);
 
   app.handleRequest(actionMap);
-});
+}
+
+module.exports = {
+  factsAboutGoogle: functions.https.onRequest(factsAboutGoogle)
+};
