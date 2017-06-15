@@ -11,12 +11,15 @@
   "scripts": {
     "lint": "semistandard --fix \"**/*.js\"",
     "start": "firebase serve --only functions",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
   },
   "dependencies": {
     "actions-on-google": "^1.0.0",
+    "deep-freeze": "0.0.1",
     "firebase-admin": "^4.2.1",
-    "firebase-functions": "^0.5.7"
+    "firebase-functions": "^0.5.7",
+    "sprintf-js": "^1.1.1"
   },
   "devDependencies": {
     "eslint": "^3.19.0",

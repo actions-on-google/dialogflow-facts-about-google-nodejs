@@ -13,370 +13,265 @@
 
 'use strict';
 
-/**
- * @typedef {*} ApiAiApp
- */
-
-process.env.DEBUG = 'actions-on-google:*';
 const { ApiAiApp } = require('actions-on-google');
 const functions = require('firebase-functions');
+const { sprintf } = require('sprintf-js');
 
-// API.AI actions
-const UNRECOGNIZED_DEEP_LINK = 'deeplink.unknown';
-const TELL_FACT = 'tell.fact';
-const TELL_CAT_FACT = 'tell.cat.fact';
+const strings = require('./strings');
 
-// API.AI parameter names
-const CATEGORY_ARGUMENT = 'category';
+process.env.DEBUG = 'actions-on-google:*';
 
-// API.AI Contexts/lifespans
-const FACTS_CONTEXT = 'choose_fact-followup';
-const CAT_CONTEXT = 'choose_cats-followup';
-const DEFAULT_LIFESPAN = 5;
-const END_LIFESPAN = 0;
-
-const FACT_TYPE = {
-  HISTORY: 'history',
-  HEADQUARTERS: 'headquarters',
-  CATS: 'cats'
+/** API.AI Actions {@link https://api.ai/docs/actions-and-parameters#actions} */
+const Actions = {
+  UNRECOGNIZED_DEEP_LINK: 'deeplink.unknown',
+  TELL_FACT: 'tell.fact',
+  TELL_CAT_FACT: 'tell.cat.fact'
+};
+/** API.AI Parameters {@link https://api.ai/docs/actions-and-parameters#parameters} */
+const Parameters = {
+  CATEGORY: 'category'
+};
+/** API.AI Contexts {@link https://api.ai/docs/contexts} */
+const Contexts = {
+  FACTS: 'choose_fact-followup',
+  CATS: 'choose_cats-followup'
+};
+/** API.AI Context Lifespans {@link https://api.ai/docs/contexts#lifespan} */
+const Lifespans = {
+  DEFAULT: 5,
+  END: 0
 };
 
-const HISTORY_FACTS = new Set([
-  'Google was founded in 1998.',
-  'Google was founded by Larry Page and Sergey Brin.',
-  'Google went public in 2004.',
-  'Google has more than 70 offices in more than 40 countries.'
-]);
-
-const HQ_FACTS = new Set([
-  "Google's headquarters is in Mountain View, California.",
-  'Google has over 30 cafeterias in its main campus.',
-  'Google has over 10 fitness facilities in its main campus.'
-]);
-
-const CAT_FACTS = new Set([
-  'Cats are animals.',
-  'Cats have nine lives.',
-  'Cats descend from other cats.'
-]);
-
-const GOOGLE_IMAGES = [
-  [
-    'https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Search_GSA.2e16d0ba.fill-300x300.png',
-    'Google app logo'
-  ],
-  [
-    'https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Google_Logo.max-900x900.png',
-    'Google logo'
-  ],
-  [
-    'https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Dinosaur-skeleton-at-Google.max-900x900.jpg',
-    'Stan the Dinosaur at Googleplex'
-  ],
-  [
-    'https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Wide-view-of-Google-campus.max-900x900.jpg',
-    'Googleplex'
-  ],
-  [
-    'https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Bikes-on-the-Google-campus.2e16d0ba.fill-300x300.jpg',
-    'Biking at Googleplex'
-  ]
-];
-
-const CAT_IMAGE = [
-  'https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/imgs/160204193356-01-cat-500.jpg',
-  'Gray Cat'
-];
-
-const LINK_OUT_TEXT = 'Learn more';
-const GOOGLE_LINK = 'https://www.google.com/about/';
-const CATS_LINK = 'https://www.google.com/search?q=cats';
-const NEXT_FACT_DIRECTIVE = 'Would you like to hear another fact?';
-const CONFIRMATION_SUGGESTIONS = ['Sure', 'No thanks'];
-
-const NO_INPUTS = [
-  "I didn't hear that.",
-  "If you're still there, say that again.",
-  'We can stop here. See you soon.'
-];
-
-// This sample uses a sound clip from the Actions on Google Sound Library
-// https://developers.google.com/actions/tools/sound-library
-const MEOW_SRC = 'https://actions.google.com/sounds/v1/animals/cat_purr_close.ogg';
-
 /**
- * Get a random value from an array
  * @template T
  * @param {Array<T>} array The array to get a random value from
- * @return {T | null} A random value from the array or null if the array is empty
  */
-function getRandomValue (array) {
-  if (!array.length) {
+const getRandomValue = array => array[Math.floor(Math.random() * array.length)];
+
+/** @param {Array<string>} facts The array of facts to choose a fact from */
+const getRandomFact = facts => {
+  if (!facts.length) {
     return null;
   }
-  const randomIndex = Math.floor(Math.random() * array.length);
-  return array[randomIndex];
-}
-
-/**
- * Get a random image from an array of images
- * @param {Array<Array<string>>} images The array of image urls to pick an image from
- * @return {Array<string>} A random image url
- */
-function getRandomImage (images) {
-  return getRandomValue(images);
-}
-
-/**
- * Gets a random fact from a set of facts
- * @param {Set<string>} facts The set of facts to choose a fact from
- * @return {string | null} A random fact
- */
-function getRandomFact (facts) {
-  const fact = getRandomValue(Array.from(facts));
-  if (fact) {
-    facts.delete(fact); // Set.delete(null) does not throw an error but this is safer
-  }
+  const fact = getRandomValue(facts);
+  // Delete the fact from the local data since we now already used it
+  facts.splice(facts.indexOf(fact), 1);
   return fact;
+};
+
+/** @param {Array<string>} messages The messages to concat */
+const concat = messages => messages.map(message => message.trim()).join(' ');
+
+// Polyfill Object.values to get the values of the keys of an object
+if (!Object.values) {
+  Object.values = o => Object.keys(o).map(k => o[k]);
 }
 
-/**
- * Concat messages together with a single space between each message given an array
- * @param {Array<string>} messages The messages to concat
- * @return {string} A single concatenated message with a single space between each message
- */
-function concatMessagesArray (messages) {
-  return messages.map(message => message.trim()).join(' ');
-}
-
-/**
- * Concat messages with a single space between each message given a list of strings as parameters
- * @param {Array<string>} messages The messages to concat
- * @return {string} A single concatenated message with a single space between each message
- */
-function concatMessages (...messages) {
-  return concatMessagesArray(messages);
-}
+/** @typedef {*} ApiAiApp */
 
 /**
  * Greet the user and direct them to next turn
  * @param {ApiAiApp} app ApiAiApp instance
  * @return {void}
  */
-function unhandledDeepLinks (app) {
-  if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
-    app.ask(app.buildRichResponse()
-      .addSimpleResponse(`Welcome to Facts about Google! I'd really rather not talk about ${app.getRawInput()}. Wouldn't you rather talk about Google? I can tell you about Google's history or its headquarters. Which do you want to hear about?`)
-      .addSuggestions(['History', 'Headquarters']), NO_INPUTS);
-  } else {
-    app.ask(`Welcome to Facts about Google! I'd really rather not talk about ${app.getRawInput()}. Wouldn't you rather talk about Google? I can tell you about Google's history or its headquarters. Which do you want to hear about?`, NO_INPUTS);
+const unhandledDeepLinks = app => {
+  /** @type {string} */
+  const rawInput = app.getRawInput();
+  const response = sprintf(strings.general.unhandled, rawInput);
+  /** @type {boolean} */
+  const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
+  if (!screenOutput) {
+    return app.ask(response, strings.general.noInputs);
   }
-}
+  const suggestions = Object.values(strings.categories).map(category => category.suggestion);
+  const richResponse = app.buildRichResponse()
+    .addSimpleResponse(response)
+    .addSuggestions(suggestions);
+
+  app.ask(richResponse, strings.general.noInputs);
+};
 
 /**
- * Say a fact
- * @param {ApiAiApp} app ApiAiApp instance
- * @return {void}
+ * @typedef {Object} FactsData
+ * @prop {{[category: string]: Array<string>}} content
+ * @prop {Array<string> | null} cats
  */
-function tellFact (app) {
-  /**
-   * @type {Set<string>}
-   */
-  const historyFacts = app.data.historyFacts ? new Set(app.data.historyFacts) : HISTORY_FACTS;
-  /**
-   * @type {Set<string>}
-   */
-  const hqFacts = app.data.hqFacts ? new Set(app.data.hqFacts) : HQ_FACTS;
-
-  if (!historyFacts.size && !hqFacts.size) {
-    app.tell('Actually it looks like you heard it all. Thanks for listening!');
-    return;
-  }
-
-  /**
-   * @type {string}
-   */
-  const factCategory = app.getArgument(CATEGORY_ARGUMENT);
-
-  /**
-   * @type {boolean}
-   */
-  const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
-
-  if (factCategory === FACT_TYPE.HISTORY) {
-    const fact = getRandomFact(historyFacts);
-    if (!fact) {
-      if (screenOutput) {
-        const suggestions = ['Headquarters'];
-        /**
-         * @type {Array<string>}
-         */
-        const catFacts = app.data.catFacts;
-        if (!catFacts || catFacts.length) {
-          suggestions.push('Cats');
-        }
-        app.ask(app.buildRichResponse()
-          .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS))
-          .addSuggestions(suggestions), NO_INPUTS);
-        return;
-      }
-
-      app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HEADQUARTERS), NO_INPUTS);
-      return;
-    }
-
-    const factPrefix = "Sure, here's a history fact.";
-    app.data.historyFacts = Array.from(historyFacts);
-
-    if (screenOutput) {
-      const image = getRandomImage(GOOGLE_IMAGES);
-      app.ask(app.buildRichResponse()
-        .addSimpleResponse(factPrefix)
-        .addBasicCard(app.buildBasicCard(fact)
-          .addButton(LINK_OUT_TEXT, GOOGLE_LINK)
-          .setImage(image[0], image[1]))
-        .addSimpleResponse(NEXT_FACT_DIRECTIVE)
-        .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
-      return;
-    }
-
-    app.ask(concatMessages(factPrefix, fact, NEXT_FACT_DIRECTIVE), NO_INPUTS);
-    return;
-  }
-
-  if (factCategory === FACT_TYPE.HEADQUARTERS) {
-    const fact = getRandomFact(hqFacts);
-    if (!fact) {
-      if (screenOutput) {
-        const suggestions = ['History'];
-        /**
-         * @type {Array<string>}
-         */
-        const catFacts = app.data.catFacts;
-        if (!catFacts || catFacts.length) {
-          suggestions.push('Cats');
-        }
-        app.ask(app.buildRichResponse()
-          .addSimpleResponse(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY))
-          .addSuggestions(suggestions), NO_INPUTS);
-        return;
-      }
-      app.ask(noFactsLeft(app, factCategory, FACT_TYPE.HISTORY), NO_INPUTS);
-      return;
-    }
-
-    const factPrefix = "Okay, here's a headquarters fact.";
-    app.data.hqFacts = Array.from(hqFacts);
-    if (screenOutput) {
-      const image = getRandomImage(GOOGLE_IMAGES);
-      app.ask(app.buildRichResponse()
-        .addSimpleResponse(factPrefix)
-        .addBasicCard(app.buildBasicCard(fact)
-          .setImage(image[0], image[1])
-          .addButton(LINK_OUT_TEXT, GOOGLE_LINK))
-        .addSimpleResponse(NEXT_FACT_DIRECTIVE)
-        .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
-      return;
-    }
-    app.ask(concatMessages(factPrefix, fact, NEXT_FACT_DIRECTIVE), NO_INPUTS);
-    return;
-  }
-
-  console.error(`${CATEGORY_ARGUMENT} parameter was not provided by API.AI ${TELL_FACT} action`);
-}
 
 /**
- * Say a cat fact
- * @param {ApiAiApp} app ApiAiApp instance
- * @return {void}
+ * @typedef {Object} AppData
+ * @prop {FactsData} facts
  */
-function tellCatFact (app) {
-  /**
-   * @type {Set<string>}
-   */
-  const catFacts = app.data.catFacts ? new Set(app.data.catFacts) : CAT_FACTS;
-  const fact = getRandomFact(catFacts);
 
-  /**
-   * @type {boolean}
-   */
-  const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
-
-  if (!fact) {
-    // Add facts context to outgoing context list
-    app.setContext(FACTS_CONTEXT, DEFAULT_LIFESPAN, {});
-    // Replace outgoing cat-facts context with lifespan = 0 to end it
-    app.setContext(CAT_CONTEXT, END_LIFESPAN, {});
-    if (screenOutput) {
-      app.ask(app.buildRichResponse()
-        .addSimpleResponse("Looks like you've heard all there is to know about cats. Would you like to hear about Google?", NO_INPUTS)
-        .addSuggestions(CONFIRMATION_SUGGESTIONS));
-      return;
-    }
-    app.ask("Looks like you've heard all there is to know about cats. Would you like to hear about Google?", NO_INPUTS);
-    return;
+/**
+ * Set up app.data for use in the action
+ * @param {ApiAiApp} app ApiAiApp instance
+ */
+const initData = app => {
+  /** @type {AppData} */
+  const data = app.data;
+  if (!data.facts) {
+    data.facts = {
+      content: {},
+      cats: null
+    };
   }
-
-  app.data.catFacts = Array.from(catFacts);
-  const factPrefix = `Alright, here's a cat fact. <audio src="${MEOW_SRC}"></audio>`;
-  if (screenOutput) {
-    app.ask(app.buildRichResponse()
-      .addSimpleResponse(`<speak>${factPrefix}</speak>`)
-      .addBasicCard(app.buildBasicCard(fact)
-        .setImage(CAT_IMAGE[0], CAT_IMAGE[1])
-        .addButton(LINK_OUT_TEXT, CATS_LINK))
-      .addSimpleResponse(NEXT_FACT_DIRECTIVE)
-      .addSuggestions(CONFIRMATION_SUGGESTIONS), NO_INPUTS);
-    return;
-  }
-  app.ask(`<speak>${concatMessages(factPrefix, fact, NEXT_FACT_DIRECTIVE)}</speak>`, NO_INPUTS);
-}
+  return data;
+};
 
 /**
  * Say they've heard it all about this category
  * @param {ApiAiApp} app ApiAiApp instance
  * @param {string} currentCategory The current category
  * @param {string} redirectCategory The category to redirect to since there are no facts left
- * @return {string} The response to return back
  */
-function noFactsLeft (app, currentCategory, redirectCategory) {
-  const parameters = {};
-  parameters[CATEGORY_ARGUMENT] = redirectCategory;
+const noFactsLeft = (app, currentCategory, redirectCategory) => {
+  const data = initData(app);
   // Replace the outgoing facts context with different parameters
-  app.setContext(FACTS_CONTEXT, DEFAULT_LIFESPAN, parameters);
-  const response = [
-    `Looks like you've heard all there is to know about the ${currentCategory} of Google. I could tell you about its ${redirectCategory} instead.`
-  ];
-  /**
-   * @type {Array<string>}
-   */
-  const catFacts = app.data.catFacts;
+  app.setContext(Contexts.FACTS, Lifespans.DEFAULT, { [Parameters.CATEGORY]: redirectCategory });
+  const response = [sprintf(strings.transitions.content.heardItAll, currentCategory, redirectCategory)];
+  const catFacts = data.facts.cats;
   if (!catFacts || catFacts.length) {
-    response.push('By the way, I can tell you about cats too.');
+    response.push(strings.transitions.content.alsoCats);
   }
-  response.push('So what would you like to hear about?');
-  return concatMessagesArray(response);
-}
+  response.push(strings.general.wantWhat);
+  return concat(response);
+};
+
+/**
+ * Say a fact
+ * @param {ApiAiApp} app ApiAiApp instance
+ * @return {void}
+ */
+const tellFact = app => {
+  const data = initData(app);
+  const facts = data.facts.content;
+  for (const category of Object.values(strings.categories)) {
+    // Initialize categories with all the facts if they haven't been read
+    if (!facts[category.category]) {
+      facts[category.category] = category.facts.slice();
+    }
+  }
+  if (Object.values(facts).every(category => !category.length)) {
+    // If every fact category facts stored in app.data is empty
+    return app.tell(strings.general.heardItAll);
+  }
+  const parameter = Parameters.CATEGORY;
+  /** @type {string} */
+  const factCategory = app.getArgument(parameter);
+  /** @type {boolean} */
+  const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
+  const category = strings.categories[factCategory];
+  if (!category) {
+    /** @type {string} */
+    const action = app.getIntent();
+    return console.error(`${parameter} parameter is unrecognized or not provided by API.AI ${action} action`);
+  }
+  const fact = getRandomFact(facts[category.category]);
+  if (!fact) {
+    const otherCategory = Object.values(strings.categories).find(other => other !== category);
+    if (!otherCategory) {
+      return console.error(`No other category besides ${category.category} exists`);
+    }
+    if (!screenOutput) {
+      return app.ask(noFactsLeft(app, factCategory, otherCategory.category), strings.general.noInputs);
+    }
+    const suggestions = [otherCategory.suggestion];
+    const catFacts = data.facts.cats;
+    if (!catFacts || catFacts.length) {
+      // If cat facts not loaded or there still are cat facts left
+      suggestions.push(strings.cats.suggestion);
+    }
+    const richResponse = app.buildRichResponse()
+      .addSimpleResponse(noFactsLeft(app, factCategory, otherCategory.category))
+      .addSuggestions(suggestions);
+
+    return app.ask(richResponse, strings.general.noInputs);
+  }
+  const factPrefix = category.factPrefix;
+  if (!screenOutput) {
+    return app.ask(concat([factPrefix, fact, strings.general.nextFact]), strings.general.noInputs);
+  }
+  const image = getRandomValue(strings.content.images);
+  const [url, name] = image;
+  const card = app.buildBasicCard(fact)
+    .addButton(strings.general.linkOut, strings.content.link)
+    .setImage(url, name);
+
+  const richResponse = app.buildRichResponse()
+    .addSimpleResponse(factPrefix)
+    .addBasicCard(card)
+    .addSimpleResponse(strings.general.nextFact)
+    .addSuggestions(strings.general.suggestions.confirmation);
+
+  app.ask(richResponse, strings.general.noInputs);
+};
+
+/**
+ * Say a cat fact
+ * @param {ApiAiApp} app ApiAiApp instance
+ * @return {void}
+ */
+const tellCatFact = app => {
+  const data = initData(app);
+  if (!data.facts.cats) {
+    data.facts.cats = strings.cats.facts.slice();
+  }
+  const catFacts = data.facts.cats;
+  const fact = getRandomFact(catFacts);
+  /** @type {boolean} */
+  const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
+  if (!fact) {
+    // Add facts context to outgoing context list
+    app.setContext(Contexts.FACTS, Lifespans.DEFAULT, {});
+    // Replace outgoing cat-facts context with lifespan = 0 to end it
+    app.setContext(Contexts.CATS, Lifespans.END, {});
+    if (!screenOutput) {
+      return app.ask(strings.transitions.cats.heardItAll, strings.general.noInputs);
+    }
+    const richResponse = app.buildRichResponse()
+      .addSimpleResponse(strings.transitions.cats.heardItAll, strings.general.noInputs)
+      .addSuggestions(strings.general.suggestions.confirmation);
+
+    return app.ask(richResponse);
+  }
+  const factPrefix = sprintf(strings.cats.factPrefix, getRandomValue(strings.cats.sounds));
+  if (!screenOutput) {
+    // <speak></speak> is needed here since factPrefix is a SSML string and contains audio
+    return app.ask(`<speak>${concat([factPrefix, fact, strings.general.nextFact])}</speak>`, strings.general.noInputs);
+  }
+  const image = getRandomValue(strings.cats.images);
+  const [url, name] = image;
+  const card = app.buildBasicCard(fact)
+    .setImage(url, name)
+    .addButton(strings.general.linkOut, strings.cats.link);
+
+  const richResponse = app.buildRichResponse()
+    .addSimpleResponse(`<speak>${factPrefix}</speak>`)
+    .addBasicCard(card)
+    .addSimpleResponse(strings.general.nextFact)
+    .addSuggestions(strings.general.suggestions.confirmation);
+
+  app.ask(richResponse, strings.general.noInputs);
+};
+
+/** @type {Map<string, function(ApiAiApp): void>} */
+const actionMap = new Map();
+actionMap.set(Actions.UNRECOGNIZED_DEEP_LINK, unhandledDeepLinks);
+actionMap.set(Actions.TELL_FACT, tellFact);
+actionMap.set(Actions.TELL_CAT_FACT, tellCatFact);
 
 /**
  * The entry point to handle a http request
  * @param {Request} request An Express like Request object of the HTTP request
  * @param {Response} response An Express like Response object to send back data
- * @return {void}
  */
-function factsAboutGoogle (request, response) {
+const factsAboutGoogle = functions.https.onRequest((request, response) => {
   const app = new ApiAiApp({ request, response });
   console.log(`Request headers: ${JSON.stringify(request.headers)}`);
   console.log(`Request body: ${JSON.stringify(request.body)}`);
-
-  const actionMap = new Map();
-  actionMap.set(UNRECOGNIZED_DEEP_LINK, unhandledDeepLinks);
-  actionMap.set(TELL_FACT, tellFact);
-  actionMap.set(TELL_CAT_FACT, tellCatFact);
-
   app.handleRequest(actionMap);
-}
+});
 
 module.exports = {
-  factsAboutGoogle: functions.https.onRequest(factsAboutGoogle)
+  factsAboutGoogle
 };
