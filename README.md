@@ -20,7 +20,7 @@ See the developer guide and release notes at [https://developers.google.com/acti
 (https://firebase.google.com/docs/functions/):
    1. Follow the instructions to [set up and initialize Firebase SDK for Cloud Functions](https://firebase.google.com/docs/functions/get-started#set_up_and_initialize_functions_sdk). Make sure to select the project that you have previously generated in the Actions on Google Console and to reply "N" when asked to overwrite existing files by the Firebase CLI.
    1. Run `firebase deploy --only functions` and take note of the endpoint where the fulfillment webhook has been published. It should look like `Function URL (factsAboutGoogle): https://us-central1-YOUR_PROJECT.cloudfunctions.net/factsAboutGoogle`
-1. Go back to the API.AI console and select *Fulfillment* from the left navigation menu. Enable *Webhook*, set the value of *URL* to the `Function URL` from the preiovus step, then click *Save*.
+1. Go back to the API.AI console and select *Fulfillment* from the left navigation menu. Enable *Webhook*, set the value of *URL* to the `Function URL` from the previous step, then click *Save*.
 1. Select *Intents* from the left navigation menu. Select the `quit_facts` intent, scroll down to the end of the page and click *Action on Google*, check "End Conversation" and then click *Save*.
 1. Select *Integrations* from the left navigation menu and open the *Settings* menu for Actions on Google.
 1. Enter the following intents as "Additional triggering intents"
