@@ -23,7 +23,7 @@ const TELL_FACT = 'tell.fact';
 const TELL_CAT_FACT = 'tell.cat.fact';
 
 // API.AI parameter names
-const CATEGORY_ARGUMENT = 'category';
+const CATEGORY_ARGUMENT = 'fact-category';
 
 // API.AI Contexts/lifespans
 const FACTS_CONTEXT = 'choose_fact-followup';
