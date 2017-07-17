@@ -9,7 +9,8 @@
     "node": "~4.2"
   },
   "scripts": {
-    "lint": "semistandard --fix \"**/*.js\"",
+    "lint": "eslint --fix \"**/*.js\"",
+    "test": "npm run lint",
     "start": "firebase serve --only functions",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
