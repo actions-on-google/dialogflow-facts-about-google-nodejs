@@ -23,8 +23,8 @@
 // eslint-disable-next-line quotes
 const deepFreeze = require('deep-freeze');
 
-const categories = {
-  "headquarters": {
+const categories = [
+  {
     "category": "headquarters",
     "suggestion": "Headquarters",
     "facts": [
@@ -34,7 +34,7 @@ const categories = {
     ],
     "factPrefix": "Okay, here's a headquarters fact."
   },
-  "history": {
+  {
     "category": "history",
     "suggestion": "History",
     "facts": [
@@ -45,7 +45,7 @@ const categories = {
     ],
     "factPrefix": "Sure, here's a history fact."
   }
-};
+];
 
 const content = {
   "images": [

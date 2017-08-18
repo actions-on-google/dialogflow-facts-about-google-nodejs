@@ -160,7 +160,7 @@ const tellFact = app => {
   const factCategory = app.getArgument(parameter);
   /** @type {boolean} */
   const screenOutput = app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT);
-  const category = strings.categories[factCategory];
+  const category = strings.categories.find(c => c.category === factCategory);
   if (!category) {
     /** @type {string} */
     const action = app.getIntent();
