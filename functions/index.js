@@ -83,7 +83,7 @@ const unhandledDeepLinks = app => {
   if (!screenOutput) {
     return app.ask(response, strings.general.noInputs);
   }
-  const suggestions = Object.values(strings.categories).map(category => category.suggestion);
+  const suggestions = strings.categories.map(category => category.suggestion);
   const richResponse = app.buildRichResponse()
     .addSimpleResponse(response)
     .addSuggestions(suggestions);
@@ -145,7 +145,7 @@ const noFactsLeft = (app, currentCategory, redirectCategory) => {
 const tellFact = app => {
   const data = initData(app);
   const facts = data.facts.content;
-  for (const category of Object.values(strings.categories)) {
+  for (const category of strings.categories) {
     // Initialize categories with all the facts if they haven't been read
     if (!facts[category.category]) {
       facts[category.category] = category.facts.slice();
@@ -168,7 +168,7 @@ const tellFact = app => {
   }
   const fact = getRandomFact(facts[category.category]);
   if (!fact) {
-    const otherCategory = Object.values(strings.categories).find(other => other !== category);
+    const otherCategory = strings.categories.find(other => other !== category);
     if (!otherCategory) {
       return console.error(`No other category besides ${category.category} exists`);
     }
