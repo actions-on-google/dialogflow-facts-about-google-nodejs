@@ -5,13 +5,19 @@
   "private": true,
   "license": "Apache Version 2.0",
   "author": "Google Inc.",
+  "config" : {
+    "port" : "5000"
+  },
   "engines": {
     "node": "~4.2"
   },
   "scripts": {
     "lint": "eslint --fix \"**/*.js\"",
     "test": "npm run lint",
-    "start": "firebase serve --only functions",
+    "serve": "firebase serve --only functions",
+    "start": "npm run serve",
+    "tunnel": "ngrok http $npm_package_config_port",
+    "start:tunnel": "stmux -M -- [ [ -s 1/2 \"npm run tunnel\" ] : \"npm run serve -- --port $npm_package_config_port\" ]",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
@@ -30,5 +36,9 @@
     "eslint-plugin-node": "^5.0.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1"
+  },
+  "optionalDependencies": {
+    "ngrok": "^2.2.22",
+    "stmux": "^1.4.18"
   }
 }
