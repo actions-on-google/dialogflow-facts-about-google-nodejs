@@ -13,7 +13,7 @@
 
 'use strict';
 
-const { ApiAiApp } = require('actions-on-google');
+const { DialogflowApp } = require('actions-on-google');
 const functions = require('firebase-functions');
 const { sprintf } = require('sprintf-js');
 
@@ -21,22 +21,22 @@ const strings = require('./strings');
 
 process.env.DEBUG = 'actions-on-google:*';
 
-/** API.AI Actions {@link https://api.ai/docs/actions-and-parameters#actions} */
+/** Dialogflow Actions {@link https://dialogflow.com/docs/actions-and-parameters#actions} */
 const Actions = {
   UNRECOGNIZED_DEEP_LINK: 'deeplink.unknown',
   TELL_FACT: 'tell.fact',
   TELL_CAT_FACT: 'tell.cat.fact'
 };
-/** API.AI Parameters {@link https://api.ai/docs/actions-and-parameters#parameters} */
+/** Dialogflow Parameters {@link https://dialogflow.com/docs/actions-and-parameters#parameters} */
 const Parameters = {
   CATEGORY: 'category'
 };
-/** API.AI Contexts {@link https://api.ai/docs/contexts} */
+/** Dialogflow Contexts {@link https://dialogflow.com/docs/contexts} */
 const Contexts = {
   FACTS: 'choose_fact-followup',
   CATS: 'choose_cats-followup'
 };
-/** API.AI Context Lifespans {@link https://api.ai/docs/contexts#lifespan} */
+/** Dialogflow Context Lifespans {@link https://dialogflow.com/docs/contexts#lifespan} */
 const Lifespans = {
   DEFAULT: 5,
   END: 0
@@ -67,11 +67,11 @@ if (!Object.values) {
   Object.values = o => Object.keys(o).map(k => o[k]);
 }
 
-/** @typedef {*} ApiAiApp */
+/** @typedef {*} DialogflowApp */
 
 /**
  * Greet the user and direct them to next turn
- * @param {ApiAiApp} app ApiAiApp instance
+ * @param {DialogflowApp} app DialogflowApp instance
  * @return {void}
  */
 const unhandledDeepLinks = app => {
@@ -104,7 +104,7 @@ const unhandledDeepLinks = app => {
 
 /**
  * Set up app.data for use in the action
- * @param {ApiAiApp} app ApiAiApp instance
+ * @param {DialogflowApp} app DialogflowApp instance
  */
 const initData = app => {
   /** @type {AppData} */
@@ -120,7 +120,7 @@ const initData = app => {
 
 /**
  * Say they've heard it all about this category
- * @param {ApiAiApp} app ApiAiApp instance
+ * @param {DialogflowApp} app DialogflowApp instance
  * @param {string} currentCategory The current category
  * @param {string} redirectCategory The category to redirect to since there are no facts left
  */
@@ -139,7 +139,7 @@ const noFactsLeft = (app, currentCategory, redirectCategory) => {
 
 /**
  * Say a fact
- * @param {ApiAiApp} app ApiAiApp instance
+ * @param {DialogflowApp} app DialogflowApp instance
  * @return {void}
  */
 const tellFact = app => {
@@ -164,7 +164,9 @@ const tellFact = app => {
   if (!category) {
     /** @type {string} */
     const action = app.getIntent();
-    return console.error(`${parameter} parameter is unrecognized or not provided by API.AI ${action} action`);
+    console.error(`${parameter} parameter is unrecognized or ` +
+      `not provided by Dialogflow ${action} action`);
+    return;
   }
   const fact = getRandomFact(facts[category.category]);
   if (!fact) {
@@ -208,7 +210,7 @@ const tellFact = app => {
 
 /**
  * Say a cat fact
- * @param {ApiAiApp} app ApiAiApp instance
+ * @param {DialogflowApp} app DialogflowApp instance
  * @return {void}
  */
 const tellCatFact = app => {
@@ -254,7 +256,7 @@ const tellCatFact = app => {
   app.ask(richResponse, strings.general.noInputs);
 };
 
-/** @type {Map<string, function(ApiAiApp): void>} */
+/** @type {Map<string, function(DialogflowApp): void>} */
 const actionMap = new Map();
 actionMap.set(Actions.UNRECOGNIZED_DEEP_LINK, unhandledDeepLinks);
 actionMap.set(Actions.TELL_FACT, tellFact);
@@ -266,7 +268,7 @@ actionMap.set(Actions.TELL_CAT_FACT, tellCatFact);
  * @param {Response} response An Express like Response object to send back data
  */
 const factsAboutGoogle = functions.https.onRequest((request, response) => {
-  const app = new ApiAiApp({ request, response });
+  const app = new DialogflowApp({ request, response });
   console.log(`Request headers: ${JSON.stringify(request.headers)}`);
   console.log(`Request body: ${JSON.stringify(request.body)}`);
   app.handleRequest(actionMap);
