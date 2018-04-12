@@ -3,7 +3,7 @@
     "ecmaVersion": 7,
     "sourceType": "script"
   },
-  "extends": ["semistandard"],
+  "extends": ["google"],
   "env": {
     "node": true
   }
