@@ -143,7 +143,7 @@ app.intent('tell_cat_fact', (conv) => {
   conv.ask(new SimpleResponse({
     // <speak></speak> is needed here since factPrefix is a SSML string
     // and contains audio.
-    ssml: `<speak>${concat(factPrefix, sound, fact)}</speak>`,
+    speech: `<speak>${concat(factPrefix, sound, fact)}</speak>`,
     text: factPrefix,
   }));
   conv.ask(responses.general.nextFact);
