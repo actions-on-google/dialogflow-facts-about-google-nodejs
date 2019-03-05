@@ -37,6 +37,16 @@ and deployed on [Cloud Functions for Firebase](https://firebase.google.com/docs/
 + You can test your Action on any Google Assistant-enabled device. Make sure the Assistant is signed into the same account used to create the Actions project, and just say “OK Google, talk to my test app”.
 + You can also use the Actions on Google Console simulator to test most features and preview on-device behavior.
 
+### Automated Testing
+Unit and integration tests are located in the `functions/test/`. In each of the JavaScript files, change `projectId` and `pathToServiceAccount` to your GCP project id and the path to the JSON file for your service account - please follow the [following instructions](https://cloud.google.com/iam/docs/creating-managing-service-accounts) on how to create a service account.
+
+1. `npm install` from the `functions/` directory
+1. `npm test`
+
+Notes:
+1. One of the configuration variables you'll need to set in the code is `fulfillUrl`, which is the url of the fulfillment. Ideally, this should be a locally run cloud function. We recommend using `firebase serve`.
+1. To use Dialogflow API, you will need to have service account that has the "Dialogflow API client" role. You can set this in the GCP IAM page (see https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
+
 ## References & Issues
 + Questions? Go to [StackOverflow](https://stackoverflow.com/questions/tagged/actions-on-google), [Assistant Developer Community on Reddit](https://www.reddit.com/r/GoogleAssistantDev/) or [Support](https://developers.google.com/actions/support/).
 + For bugs, please report an issue on Github.
