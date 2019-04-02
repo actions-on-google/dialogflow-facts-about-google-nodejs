@@ -39,16 +39,19 @@ const Lifespans = {
 
 const app = dialogflow({
   debug: true,
-  init: () => ({
-    data: {
-      // Convert array of facts to map
-      facts: responses.categories.reduce((o, c) => {
-        o[c.category] = c.facts.slice();
-        return o;
-      }, {}),
-      cats: responses.cats.facts.slice(), // copy cat facts
-    },
-  }),
+});
+
+app.middleware((conv) => {
+  if (!conv.data.facts) {
+    // Convert array of facts to map
+    conv.data.facts = responses.categories.reduce((o, c) => {
+      o[c.category] = c.facts.slice();
+      return o;
+    }, {});
+  }
+  if (!conv.data.cats) {
+    conv.data.cats = responses.cats.facts.slice(); // copy cat facts
+  }
 });
 
 /**

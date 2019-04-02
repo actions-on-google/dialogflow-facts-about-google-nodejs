@@ -16,9 +16,9 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "actions-on-google": "^2.0.0",
-    "firebase-admin": "^5.12.0",
-    "firebase-functions": "^1.0.1",
+    "actions-on-google": "^2.6.0",
+    "firebase-admin": "7.2.0",
+    "firebase-functions": "2.2.1",
     "sprintf-js": "^1.1.1"
   },
   "devDependencies": {
