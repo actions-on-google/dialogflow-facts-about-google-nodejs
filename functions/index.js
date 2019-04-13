@@ -135,7 +135,7 @@ app.intent('tell_cat_fact', (conv) => {
     conv.contexts.delete(AppContexts.FACT);
     conv.contexts.delete(AppContexts.CATS);
     conv.ask(responses.transitions.cats.heardItAll);
-    return conv.ask(responses.general.suggestions.confirmation);
+    return conv.ask(responses.general.suggestions.newFact);
   }
   const {factPrefix, audio} = responses.cats;
   // conv.ask can be called multiple times to have the library construct
@@ -162,4 +162,4 @@ app.intent('tell_cat_fact', (conv) => {
 });
 
 // The entry point to handle a http request
-exports.factsAboutGoogle = functions.https.onRequest(app);
+exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app);

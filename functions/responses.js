@@ -112,7 +112,7 @@ exports.transitions = {
   },
   "cats": {
     "heardItAll": "Looks like you've heard all there is to know about cats. " +
-      "Would you like to hear about Google?",
+      "Would you like to hear about Google's history or headquarters?",
   },
 };
 
@@ -131,6 +131,7 @@ exports.general = {
      * just these suggestions
      */
     "confirmation": new Suggestions("Sure", "No thanks"),
+    "newFact": new Suggestions("History", "Headquarters"),
   },
   "nextFact": "Would you like to hear another fact?",
   "linkOut": "Learn more",
