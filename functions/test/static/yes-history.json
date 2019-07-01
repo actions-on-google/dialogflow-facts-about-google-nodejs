@@ -1,0 +1,125 @@
+{
+    "originalDetectIntentRequest": {
+        "payload": {
+            "conversation": {
+                "conversationId": "ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg",
+                "conversationToken": "[]",
+                "type": "ACTIVE"
+            },
+            "inputs": [
+                {
+                    "arguments": [
+                        {
+                            "name": "text",
+                            "rawText": "History",
+                            "textValue": "History"
+                        }
+                    ],
+                    "intent": "actions.intent.TEXT",
+                    "rawInputs": [
+                        {
+                            "inputType": "TOUCH",
+                            "query": "History"
+                        }
+                    ]
+                }
+            ],
+            "isInSandbox": true,
+            "requestType": "SIMULATOR",
+            "surface": {
+                "capabilities": [
+                    {
+                        "name": "actions.capability.AUDIO_OUTPUT"
+                    },
+                    {
+                        "name": "actions.capability.WEB_BROWSER"
+                    },
+                    {
+                        "name": "actions.capability.MEDIA_RESPONSE_AUDIO"
+                    },
+                    {
+                        "name": "actions.capability.SCREEN_OUTPUT"
+                    }
+                ]
+            },
+            "user": {
+                "lastSeen": "2019-02-06T21:40:58Z",
+                "locale": "en-US",
+                "userId": "ABwppHGiiI2_FMx4BfB8wD02lo9wB6z_1QMQhPXp4Lsan5AZBbR9FhWaWUBMwYEzX2R3jo2R3iY",
+                "userStorage": "{\"data\":{\"userName\":\"Aza Tulepbergenov\"}}"
+            }
+        },
+        "source": "google",
+        "version": "2"
+    },
+    "queryResult": {
+        "action": "tell.fact",
+        "allRequiredParamsPresent": true,
+        "fulfillmentMessages": [
+            {
+                "text": {
+                    "text": [
+                        ""
+                    ]
+                }
+            }
+        ],
+        "intent": {
+            "displayName": "choose_fact",
+            "name": "projects/aza-dev2/agent/intents/4a35cf33-e446-4b2b-a284-c70bc4dfce17"
+        },
+        "intentDetectionConfidence": 1,
+        "languageCode": "en-us",
+        "outputContexts": [
+            {
+                "name": "projects/aza-dev2/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/google_assistant_input_type_touch",
+                "parameters": {
+                    "category": "history",
+                    "category.original": "History"
+                }
+            },
+            {
+                "name": "projects/aza-dev2/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_screen_output",
+                "parameters": {
+                    "category": "history",
+                    "category.original": "History"
+                }
+            },
+            {
+                "lifespanCount": 2,
+                "name": "projects/aza-dev2/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/choose_fact-followup",
+                "parameters": {
+                    "category": "history",
+                    "category.original": "History"
+                }
+            },
+            {
+                "name": "projects/aza-dev2/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_audio_output",
+                "parameters": {
+                    "category": "history",
+                    "category.original": "History"
+                }
+            },
+            {
+                "name": "projects/aza-dev2/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_media_response_audio",
+                "parameters": {
+                    "category": "history",
+                    "category.original": "History"
+                }
+            },
+            {
+                "name": "projects/aza-dev2/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_web_browser",
+                "parameters": {
+                    "category": "history",
+                    "category.original": "History"
+                }
+            }
+        ],
+        "parameters": {
+            "category": "history"
+        },
+        "queryText": "History"
+    },
+    "responseId": "b3879b8f-9944-4968-b5fe-5bca1f100085",
+    "session": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg"
+}

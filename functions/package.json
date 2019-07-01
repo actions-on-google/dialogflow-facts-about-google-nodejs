@@ -10,7 +10,7 @@
   },
   "scripts": {
     "lint": "eslint --fix \"**/*.js\"",
-    "test": "npm run lint",
+    "test": "nyc ava --verbose test/*.js",
     "start": "firebase serve --only functions",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
@@ -22,7 +22,12 @@
     "sprintf-js": "^1.1.1"
   },
   "devDependencies": {
+    "ava": "^1.4.1",
+    "chai": "^4.2.0",
     "eslint": "^4.19.1",
-    "eslint-config-google": "^0.9.1"
+    "eslint-config-google": "^0.9.1",
+    "mocha": "^6.1.4",
+    "nyc": "^14.0.0",
+    "uuid": "^3.3.2"
   }
 }

@@ -1,0 +1,123 @@
+{
+    "originalDetectIntentRequest": {
+        "payload": {
+            "conversation": "1bd260fd-6fa2-40c8-bca2-48cceaeddfcf",
+            "inputs": [
+                {
+                    "arguments": [
+                        {
+                            "name": "text",
+                            "rawText": "Sure",
+                            "textValue": "Sure"
+                        }
+                    ],
+                    "intent": "actions.intent.TEXT",
+                    "rawInputs": [
+                        {
+                            "inputType": "TOUCH",
+                            "query": "Sure"
+                        }
+                    ]
+                }
+            ],
+            "isInSandbox": true,
+            "requestType": "SIMULATOR",
+            "surface": {
+                "capabilities": [
+                    {
+                        "name": "actions.capability.WEB_BROWSER"
+                    },
+                    {
+                        "name": "actions.capability.AUDIO_OUTPUT"
+                    },
+                    {
+                        "name": "actions.capability.SCREEN_OUTPUT"
+                    },
+                    {
+                        "name": "actions.capability.MEDIA_RESPONSE_AUDIO"
+                    }
+                ]
+            },
+            "user": {
+                "user": {
+                    "lastSeen": "0000-00-00T00:00:00Z",
+                    "locale": "en-US",
+                    "userId": "22488071-d7f5-4dbc-9444-0f8104390a89",
+                    "userStorage": "{}"
+                }
+            }
+        },
+        "source": "google",
+        "version": "2"
+    },
+    "queryResult": {
+        "action": "tell.fact",
+        "allRequiredParamsPresent": true,
+        "fulfillmentMessages": [
+            {
+                "text": {
+                    "text": [
+                        ""
+                    ]
+                }
+            }
+        ],
+        "intent": {
+            "displayName": "tell_fact",
+            "name": "projects/project-id/agent/intents/606781f6-3761-447b-a769-2e9ca538b91a"
+        },
+        "intentDetectionConfidence": 1,
+        "languageCode": "en-us",
+        "outputContexts": [
+            {
+                "name": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/google_assistant_input_type_touch",
+                "parameters": {
+                    "category": "history",
+                    "category.original": ""
+                }
+            },
+            {
+                "name": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_screen_output",
+                "parameters": {
+                    "category": "history",
+                    "category.original": ""
+                }
+            },
+            {
+                "lifespanCount": 5,
+                "name": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/choose_fact-followup",
+                "parameters": {
+                    "category": "history",
+                    "category.original": ""
+                }
+            },
+            {
+                "name": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_audio_output",
+                "parameters": {
+                    "category": "history",
+                    "category.original": ""
+                }
+            },
+            {
+                "name": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_web_browser",
+                "parameters": {
+                    "category": "history",
+                    "category.original": ""
+                }
+            },
+            {
+                "name": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg/contexts/actions_capability_media_response_audio",
+                "parameters": {
+                    "category": "history",
+                    "category.original": ""
+                }
+            }
+        ],
+        "parameters": {
+            "category": "history"
+        },
+        "queryText": "Sure"
+    },
+    "responseId": "9f4aa01a-001f-4863-a323-908d620ed24b",
+    "session": "projects/project-id/agent/sessions/ABwppHE9GdxYbMvszQLRX1FMZO7iYDyp9Ygnh05BS3rA9e9wjpAc3PhAH2t6V5QKwIlEFX262vg"
+}

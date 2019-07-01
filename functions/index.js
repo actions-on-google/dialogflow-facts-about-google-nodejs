@@ -163,3 +163,5 @@ app.intent('tell_cat_fact', (conv) => {
 
 // The entry point to handle a http request
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app);
+// For testing purposes
+exports.testApp = app;
