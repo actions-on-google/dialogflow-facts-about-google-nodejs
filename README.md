@@ -9,7 +9,7 @@ and deployed on [Cloud Functions for Firebase](https://firebase.google.com/docs/
 ### Prerequisites
 1. Node.js and NPM
     + We recommend installing using [NVM](https://github.com/creationix/nvm)
-1. Install the [Firebase CLI](https://developers.google.com/actions/dialogflow/deploy-fulfillment)
+1. Install the [Firebase CLI](https://developers.google.com/assistant/actions/dialogflow/deploy-fulfillment)
     + We recommend using version 6.5.0, `npm install -g firebase-tools@6.5.0`
     + Run `firebase login` with your Google account
 
@@ -48,9 +48,9 @@ Notes:
 1. To use Dialogflow API, you will need to have service account that has the "Dialogflow API client" role. You can set this in the GCP IAM page (see https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
 
 ## References & Issues
-+ Questions? Go to [StackOverflow](https://stackoverflow.com/questions/tagged/actions-on-google), [Assistant Developer Community on Reddit](https://www.reddit.com/r/GoogleAssistantDev/) or [Support](https://developers.google.com/actions/support/).
++ Questions? Go to [StackOverflow](https://stackoverflow.com/questions/tagged/actions-on-google), [Assistant Developer Community on Reddit](https://www.reddit.com/r/GoogleAssistantDev/) or [Support](https://developers.google.com/assistant/support).
 + For bugs, please report an issue on Github.
-+ Actions on Google [Documentation](https://developers.google.com/actions/extending-the-assistant)
++ Actions on Google [Documentation](https://developers.google.com/assistant)
 + Actions on Google [Codelabs](https://codelabs.developers.google.com/?cat=Assistant).
 + [Webhook Boilerplate Template](https://github.com/actions-on-google/dialogflow-webhook-boilerplate-nodejs) for Actions on Google.
 
